@@ -2109,38 +2109,101 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      noteName: '',
-      noteText: ''
+      fields: {
+        noteName: {
+          caption: 'Name',
+          type: 'text',
+          placeholder: 'Enter name for your note',
+          required: true,
+          minLength: 2,
+          value: '',
+          errorText: ''
+        },
+        noteText: {
+          caption: 'Text',
+          type: 'text',
+          placeholder: 'Enter text for your note',
+          required: true,
+          minLength: 3,
+          value: '',
+          errorText: ''
+        }
+      }
     };
   },
   mounted: function mounted() {
+    this.$refs.notesInputs[0].focus();
     this.getNotes();
   },
-  computed: _objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)({
+  computed: _objectSpread(_objectSpread({}, (0,vuex__WEBPACK_IMPORTED_MODULE_0__.mapState)({
     notes: function notes(state) {
       return state.notes;
+    },
+    serverError: function serverError(state) {
+      return state.serverError;
     }
-  })),
+  })), {}, {
+    computed: function computed() {
+      return this;
+    },
+    noteName: {
+      get: function get() {
+        return this.fields.noteName.value;
+      },
+      set: function set(val) {
+        this.fields.noteName.value = val;
+      }
+    },
+    noteText: {
+      get: function get() {
+        return this.fields.noteText.value;
+      },
+      set: function set(val) {
+        this.fields.noteText.value = val;
+      }
+    }
+  }),
   methods: {
+    clearError: function clearError(key) {
+      this.fields[key].errorText = '';
+    },
     getNotes: function getNotes() {
       this.$store.dispatch('getNotes');
     },
     addNote: function addNote() {
       var _this = this;
 
-      this.$store.dispatch('addNote', {
-        'name': this.noteName,
-        'text': this.noteText
-      }).then(function () {
-        _this.getNotes();
-      });
+      if (true) {
+        this.$store.dispatch('addNote', {
+          'name': this.noteName,
+          'text': this.noteText
+        }).then(function () {
+          _this.getNotes();
+        });
+      }
+    },
+    validateForm: function validateForm() {
+      var hasError = false;
+
+      for (var i in this.fields) {
+        if (this.fields[i].required) {
+          if (this.fields[i].minLength > 0 && this.fields[i].value.length < this.fields[i].minLength) {
+            this.fields[i].errorText = 'Minimum ' + this.fields[i].minLength + ' chars';
+            hasError = true;
+          }
+
+          if (this.fields[i].value.length === 0) {
+            this.fields[i].errorText = 'Field ' + this.fields[i].caption + ' is required';
+            hasError = true;
+          }
+        }
+      }
+
+      return hasError;
     }
   }
 });
@@ -2252,7 +2315,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   state: {
-    notes: []
+    notes: [],
+    serverError: ''
   },
   getters: {
     getNotes: function getNotes(state) {
@@ -2262,11 +2326,11 @@ __webpack_require__.r(__webpack_exports__);
   actions: {
     getNotes: function getNotes(context) {
       axios__WEBPACK_IMPORTED_MODULE_0___default().get("api/notes").then(function (response) {
-        console.log(response.data.notes);
         context.commit("setNotes", response.data.notes);
       })["catch"](function () {});
     },
     addNote: function addNote(context, params) {
+      context.commit("setError", '');
       return new Promise(function (resolve, reject) {
         var formData = new FormData();
 
@@ -2275,6 +2339,10 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         axios__WEBPACK_IMPORTED_MODULE_0___default().post("api/notes", formData).then(function (response) {
+          if (!response.data.success && response.data.message) {
+            context.commit("setError", response.data.message);
+          }
+
           resolve();
         })["catch"](function (e) {
           reject(e);
@@ -2285,6 +2353,9 @@ __webpack_require__.r(__webpack_exports__);
   mutations: {
     setNotes: function setNotes(state, data) {
       return state.notes = data;
+    },
+    setError: function setError(state, data) {
+      return state.serverError = data;
     }
   }
 });
@@ -2729,66 +2800,61 @@ var render = function () {
               },
             },
             [
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", { attrs: { for: "InputName" } }, [_vm._v("Name:")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.noteName,
-                      expression: "noteName",
+              _vm._l(_vm.fields, function (field, key) {
+                return _c("div", { key: key, staticClass: "form-group" }, [
+                  _c("label", { attrs: { for: "Input" + key } }, [
+                    _vm._v(_vm._s(field.caption) + ":"),
+                    field.required
+                      ? _c("span", { staticClass: "text-danger" }, [
+                          _vm._v("*"),
+                        ])
+                      : _vm._e(),
+                  ]),
+                  _vm._v(" "),
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.computed[key],
+                        expression: "computed[key]",
+                      },
+                    ],
+                    ref: "notesInputs",
+                    refInFor: true,
+                    staticClass: "form-control",
+                    class: { "is-invalid": field.errorText.length },
+                    attrs: {
+                      type: "text",
+                      id: "Input" + key,
+                      placeholder: field.placeholder,
                     },
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    type: "text",
-                    id: "InputName",
-                    placeholder: "Enter name for your note",
-                  },
-                  domProps: { value: _vm.noteName },
-                  on: {
-                    input: function ($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.noteName = $event.target.value
+                    domProps: { value: _vm.computed[key] },
+                    on: {
+                      focus: function ($event) {
+                        return _vm.clearError(key)
+                      },
+                      input: function ($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.computed, key, $event.target.value)
+                      },
                     },
-                  },
-                }),
-              ]),
+                  }),
+                  _vm._v(" "),
+                  _c("small", {
+                    staticClass: "form-text text-danger",
+                    attrs: { id: key + "Help" },
+                    domProps: { innerHTML: _vm._s(field.errorText) },
+                  }),
+                ])
+              }),
               _vm._v(" "),
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", { attrs: { for: "InputText" } }, [_vm._v("Text:")]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.noteText,
-                      expression: "noteText",
-                    },
-                  ],
-                  staticClass: "form-control",
-                  attrs: {
-                    type: "text",
-                    id: "InputText",
-                    "aria-describedby": "nameHelp",
-                    placeholder: "Enter text for your note",
-                  },
-                  domProps: { value: _vm.noteText },
-                  on: {
-                    input: function ($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.noteText = $event.target.value
-                    },
-                  },
-                }),
-              ]),
+              _c("div", {
+                staticClass: "form-text text-danger",
+                domProps: { innerHTML: _vm._s(_vm.serverError) },
+              }),
               _vm._v(" "),
               _c(
                 "button",
@@ -2798,7 +2864,8 @@ var render = function () {
                 },
                 [_vm._v("Add the new note")]
               ),
-            ]
+            ],
+            2
           ),
         ]),
       ]),

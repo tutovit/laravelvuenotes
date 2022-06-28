@@ -2,7 +2,8 @@ import axios from "axios"
 
 export default {
     state: {
-        notes: []
+        notes: [],
+        serverError: ''
     },
     getters: {
         getNotes(state) {
@@ -12,19 +13,22 @@ export default {
     actions: {
         getNotes(context) {
             axios.get("api/notes").then((response) => {
-                console.log(response.data.notes)
                 context.commit("setNotes", response.data.notes)
             }).catch(() => {
 
             })
         },
         addNote(context, params) {
+            context.commit("setError", '');
             return new Promise((resolve, reject) => {
                 let formData = new FormData();
                 for (let field in params) {
                     formData.append(field, params[field])
                 }
                 axios.post("api/notes", formData).then((response) => {
+                    if (!response.data.success && response.data.message) {
+                        context.commit("setError", response.data.message);
+                    }
                     resolve();
                 }).catch((e) => {
                     reject(e);
@@ -35,6 +39,9 @@ export default {
     mutations: {
         setNotes(state, data) {
             return state.notes = data
+        },
+        setError(state, data) {
+            return state.serverError = data
         }
     }
 }

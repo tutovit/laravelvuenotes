@@ -4,8 +4,8 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\Notes;
-use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\NotesRequest;
 
 class NotesController extends Controller
 {
@@ -24,10 +24,10 @@ class NotesController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  NotesRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(NotesRequest $request)
     {
         $obNotes = new Notes;
         $obNotes->name = $request->get('name');
