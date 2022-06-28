@@ -100,7 +100,7 @@ export default {
             this.$store.dispatch('getNotes');
         },
         addNote: function () {
-            if (true || this.validateForm()) {
+            if (this.validateForm()) {
                 this.$store.dispatch('addNote', {
                     'name': this.noteName,
                     'text': this.noteText,
