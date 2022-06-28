@@ -126,7 +126,7 @@ export default {
                 }
             }
 
-            return hasError;
+            return !hasError;
         }
     }
 }

@@ -2177,7 +2177,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     addNote: function addNote() {
       var _this = this;
 
-      if (true) {
+      if (this.validateForm()) {
         this.$store.dispatch('addNote', {
           'name': this.noteName,
           'text': this.noteText
@@ -2203,7 +2203,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       }
 
-      return hasError;
+      return !hasError;
     }
   }
 });
